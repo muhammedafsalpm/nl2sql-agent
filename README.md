@@ -20,7 +20,8 @@ A complete working example for Microsoft's free **AdventureWorks** sample databa
 [examples/adventureworks/](examples/adventureworks/) — the quickest way to try it.
 
 The LLM provider is configurable (`LLM_PROVIDER` in `.env`): **OpenAI** (e.g. `gpt-5-mini` for
-reasoning and SQL, with an optional cheap `OPENAI_FAST_MODEL` such as `gpt-4o-mini` for routing)
+reasoning and SQL, with an optional cheap `OPENAI_FAST_MODEL` such as `gpt-4o-mini` for routing),
+any **OpenAI-compatible server** via `OPENAI_BASE_URL` (LM Studio, vLLM, OpenRouter, Groq, ...),
 or a **local** model through Ollama (e.g. Qwen3). The Orchestrator uses the cheap tier in
 **Normal** mode only; in **Deep Search** it routes on the main model, which is better at judging
 whether a question is a follow-up.
@@ -705,7 +706,10 @@ Skipping Langfuse entirely (leaving the 3 keys blank) is a fully supported, zero
 | `APP_NAME` | Display name in the UI, API docs, CLI and export file names (default `SQL Assistant`) |
 | `APP_DESCRIPTION` | One sentence about what your database holds; given to the agents. Optional |
 | `DOMAIN_DIR` | Folder with your `business_rules.md`, `few_shots.md`, `golden.jsonl` (default `domain`, relative to `backend/`) |
+| `LLM_PROVIDER` | `local` (Ollama) or `openai` (OpenAI or an OpenAI-compatible server) |
 | `LLM_MODEL`, `OLLAMA_BASE_URL`, `OLLAMA_NUM_CTX` | Local model, Ollama endpoint, context window |
+| `OPENAI_API_KEY`, `OPENAI_MODEL`, `OPENAI_FAST_MODEL` | OpenAI key, main model, optional cheap routing model |
+| `OPENAI_BASE_URL` | Blank = OpenAI. Set to use an OpenAI-compatible server, e.g. `http://localhost:1234/v1` (LM Studio). OpenAI-only reasoning parameters are then not sent |
 | `DB_SERVER`/`DB_PORT`/`DB_NAME`/`DB_USER`/`DB_PASSWORD` | Database connection |
 | `DB_DRIVER` | Blank = auto-detect ODBC driver (18 → 17 → SQL Server) |
 | `DB_ENCRYPT`, `DB_TRUST_CERT` | TLS options for the connection |

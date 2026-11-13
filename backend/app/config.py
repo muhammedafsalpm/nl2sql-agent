@@ -50,6 +50,10 @@ class Settings:
     # OpenAI (used when LLM_PROVIDER is 'open'/'openai')
     openai_api_key: str = field(default_factory=lambda: _get("OPENAI_API_KEY"))
     openai_model: str = field(default_factory=lambda: _get("OPENAI_MODEL", "gpt-5-mini"))
+    # Blank = OpenAI itself. Set it to use any OpenAI-COMPATIBLE server instead: LM Studio, vLLM,
+    # LocalAI, OpenRouter, Groq, Together, ... (e.g. http://localhost:1234/v1). OPENAI_MODEL and
+    # OPENAI_FAST_MODEL then name models on THAT server.
+    openai_base_url: str = field(default_factory=lambda: _get("OPENAI_BASE_URL"))
     # Optional FAST models for cheap routing steps (blank = use the main model, i.e. no change)
     ollama_fast_model: str = field(default_factory=lambda: _get("OLLAMA_FAST_MODEL"))
     openai_fast_model: str = field(default_factory=lambda: _get("OPENAI_FAST_MODEL"))

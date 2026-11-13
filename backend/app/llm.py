@@ -2,7 +2,9 @@
 
 Provider is chosen by LLM_PROVIDER in .env:
   - "local" (default) -> Qwen3 (or any Ollama model) via Ollama
-  - "open" / "openai"  -> OpenAI (OPENAI_MODEL, e.g. gpt-5-mini) via OPENAI_API_KEY
+  - "open" / "openai"  -> OpenAI (OPENAI_MODEL, e.g. gpt-5-mini) via OPENAI_API_KEY, or any
+                          OpenAI-compatible server (LM Studio, vLLM, OpenRouter, Groq, ...) when
+                          OPENAI_BASE_URL is set
 
 `fast=True` uses the optional small routing model (OLLAMA_FAST_MODEL / OPENAI_FAST_MODEL) when set;
 otherwise it falls back to the main model, so enabling it is purely opt-in.
@@ -93,6 +95,11 @@ def _tuning(system: str, fast: bool) -> tuple[str, str]:
     """(effort, verbosity) for this call. ("", "") means send neither parameter."""
     if fast or not _is_openai():
         return "", ""          # fast tier / Ollama: never send these
+    # An OpenAI-COMPATIBLE server (OPENAI_BASE_URL) usually does not know these OpenAI-specific
+    # parameters and rejects the request. The per-agent table is therefore skipped there; the
+    # global OPENAI_REASONING_EFFORT / OPENAI_VERBOSITY still apply if you set them on purpose.
+    if settings.openai_base_url:
+        return settings.reasoning_effort, settings.reasoning_verbosity
     effort, verbosity = _AGENT_TUNING.get(_agent_label(system), ("", ""))
     # A global setting overrides the table, so the whole feature can be forced or examined from
     # .env without editing code.
@@ -208,10 +215,14 @@ def get_llm(
         # while /api/health still reports OK.
         kwargs: dict = {
             "model": model,
-            "api_key": settings.openai_api_key,
+            # Many self-hosted OpenAI-compatible servers need no key, but the client refuses an
+            # empty one - any placeholder works for them.
+            "api_key": settings.openai_api_key or ("not-needed" if settings.openai_base_url else ""),
             "timeout": settings.llm_timeout,
             "max_retries": settings.llm_max_retries,
         }
+        if settings.openai_base_url:
+            kwargs["base_url"] = settings.openai_base_url
         if temperature is not None:
             kwargs["temperature"] = temperature
         # Only ever set for main-tier calls — _tuning() returns "" for the fast tier.

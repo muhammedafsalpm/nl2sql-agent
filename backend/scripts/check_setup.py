@@ -188,8 +188,11 @@ def check_llm(call: bool) -> None:
     section("6. LLM")
     provider = settings.llm_provider.lower()
     if provider in ("open", "openai"):
-        if settings.openai_api_key:
-            ok(f"OpenAI: main model '{settings.openai_model}', fast model '{settings.fast_model}'")
+        where = settings.openai_base_url or "OpenAI"
+        if settings.openai_api_key or settings.openai_base_url:
+            ok(f"{where}: main model '{settings.openai_model}', fast model '{settings.fast_model}'")
+            if settings.openai_base_url and not settings.openai_api_key:
+                warn("OPENAI_API_KEY is blank - fine for a local server, required by hosted ones")
         else:
             fail("LLM_PROVIDER is openai but OPENAI_API_KEY is blank")
             return
