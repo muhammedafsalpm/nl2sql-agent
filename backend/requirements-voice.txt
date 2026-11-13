@@ -1,0 +1,31 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# GPU extras for voice — OPTIONAL, and only useful on a machine with an NVIDIA GPU.
+#
+# The voice packages themselves (faster-whisper, piper-tts) are in requirements.txt, so a normal
+#     pip install -r requirements.txt
+# already gives you working voice. This file is ONLY the CUDA runtime that makes speech
+# recognition run on the GPU instead of the CPU.
+#
+#     pip install -r requirements-voice.txt
+#
+# WHY IT IS SEPARATE: these two wheels are ~2 GB — more than ten times the 183 MB of the voice
+# packages themselves — and are completely useless on a CPU-only box, a laptop without an NVIDIA
+# card, or a container that has no GPU passed through. Forcing every deployment to download 2 GB
+# it can never use is exactly the kind of cost a default install should not carry.
+#
+# NOT INSTALLING THESE IS SAFE. CTranslate2 needs cuBLAS/cuDNN, which the NVIDIA *driver* alone
+# does not ship, so without them the first transcription fails on the GPU — and app/voice/service.py
+# catches that, rebuilds the model on CPU, logs one warning and carries on. Voice keeps working,
+# just slower. Measured on an RTX 6000 Ada: 0.66 s per utterance with these, 2.7 s without.
+#
+# Windows note: these wheels put their DLLs in site-packages/nvidia/*/bin, which is not a DLL
+# search path, so CTranslate2 would not find them. app/voice/service.py registers those folders
+# at load time — no manual PATH editing needed.
+#
+# Still required either way, and neither can come from pip:
+#     ffmpeg                          winget install Gyan.FFmpeg  /  apt-get install -y ffmpeg
+#     python scripts/setup_voice.py   downloads the ~60 MB Piper voice file
+# ─────────────────────────────────────────────────────────────────────────────
+
+nvidia-cublas-cu12
+nvidia-cudnn-cu12

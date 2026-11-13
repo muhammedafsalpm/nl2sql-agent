@@ -1,0 +1,131 @@
+/* Voice controls.
+ *
+ * Imported by MicButton.tsx rather than added to styles.css, so the app's stylesheet is untouched
+ * and deleting the voice folder removes these rules with it.
+ *
+ * Sizing and colours reuse the existing tokens (--accent, --border, --panel, --danger, --muted)
+ * and match the 34px .send button, so the mic sits in the composer as if it had always been there.
+ */
+
+/* Pushing the voice control to the right edge, next to send.
+ *
+ * The existing .send already carries `margin-left: auto`. Flexbox DISTRIBUTES free space between
+ * every item that has an auto margin, so giving the mic one too left it floating in the middle of
+ * the bar with a gap on both sides. Only the FIRST of the pair may claim the space.
+ *
+ * `:has()` scopes the .send override to the case where a voice control is actually rendered — when
+ * voice is unavailable MicButton returns null, the rule does not match, and .send keeps its own
+ * auto margin exactly as before. styles.css is never edited. */
+.composer-bar > .voice-btn,
+.composer-bar > .voice-recording {
+  margin-left: auto;
+}
+
+.composer-bar:has(> .voice-btn) > .send,
+.composer-bar:has(> .voice-recording) > .send {
+  margin-left: 0;
+}
+
+.voice-btn {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s, border-color 0.15s;
+}
+
+.voice-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.voice-btn:disabled { opacity: 0.35; cursor: default; }
+
+/* The icons are inline SVG sized in the component and drawn with currentColor, so the button only
+ * has to carry the colour — no font-size juggling as there was with the emoji glyphs. */
+.voice-btn svg { display: block; }
+
+.voice-error {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* Speaking: filled, so "audio is playing, click to stop" reads at a glance. */
+.voice-speaking {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+  animation: voice-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes voice-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.62; }
+}
+
+.voice-thinking { cursor: default; }
+
+.voice-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: voice-spin 0.7s linear infinite;
+}
+
+@keyframes voice-spin { to { transform: rotate(360deg); } }
+
+/* ── Recording bar ─────────────────────────────────────────────────────────── */
+.voice-recording {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 6px 3px 3px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel);
+}
+
+.voice-cancel { border-color: transparent; color: var(--muted); }
+.voice-cancel:hover { color: var(--danger); border-color: var(--danger); }
+
+.voice-send { background: var(--accent); color: #fff; border-color: transparent; }
+
+.voice-bars {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+}
+
+/* scaleY is driven from real mic amplitude in useVoiceRecorder, so these bars show the user's
+   actual voice level rather than a fixed animation. */
+.voice-bar {
+  width: 3px;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transform-origin: center;
+  transition: transform 0.08s linear;
+}
+
+.voice-timer {
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--muted);
+  min-width: 32px;
+}
+
+@media (max-width: 640px) {
+  .voice-timer { display: none; }
+  .voice-bars { height: 16px; }
+}

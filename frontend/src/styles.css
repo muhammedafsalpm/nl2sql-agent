@@ -1,0 +1,421 @@
+:root {
+  --bg: #0f1218;
+  --panel: #161b24;
+  --panel-2: #1c2230;
+  --border: #262d3b;
+  --text: #e6e9ef;
+  --muted: #8b93a7;
+  --accent: #4f9cf9;
+  --danger: #e5646d;
+  --radius: 12px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; margin: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.app {
+  height: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0 14px;
+  border-bottom: 1px solid var(--border);
+}
+.header h1 { font-size: 17px; font-weight: 600; margin: 0; }
+.subtitle { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.toggle input { accent-color: var(--accent); cursor: pointer; }
+
+/* ── Transcript ───────────────────────────────────────────────────────────── */
+.transcript {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.row { display: flex; }
+.row-user { justify-content: flex-end; }
+.row-assistant { justify-content: flex-start; }
+
+.bubble {
+  max-width: 88%;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.bubble-user {
+  background: var(--accent);
+  border-color: transparent;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  white-space: pre-wrap;
+}
+.bubble-assistant {
+  background: var(--panel);
+  border-bottom-left-radius: 4px;
+  width: 100%;
+}
+.bubble-error { border-color: var(--danger); color: #ffd9dc; }
+
+.meta {
+  margin-top: 10px;
+  font-size: 11.5px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Which pipeline produced this answer — so a fast answer is never mistaken for a verified one. */
+.badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+}
+.badge-normal { background: rgba(79, 156, 249, 0.14); color: #7db4fb; border-color: #2f5f96; }
+.badge-deep   { background: rgba(46, 196, 182, 0.14); color: #56d6c8; border-color: #2a7d75; }
+
+.rerun {
+  margin-left: auto;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-family: inherit;
+  padding: 3px 9px;
+  cursor: pointer;
+}
+.rerun:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Two toggles now live in the header. */
+.toggles { display: flex; align-items: center; gap: 16px; }
+
+/* Shown when the backend reports verified=false — the answer text says the same thing, this
+   makes it impossible to miss. */
+.unverified {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #b8860b;
+  background: rgba(184, 134, 11, 0.12);
+  color: #f0c674;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* ── Pending indicator ────────────────────────────────────────────────────── */
+.pending { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 14px; }
+.dots { display: inline-flex; gap: 4px; }
+.dots i {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 1.2s infinite ease-in-out;
+}
+.dots i:nth-child(2) { animation-delay: 0.15s; }
+.dots i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes pulse { 0%, 80%, 100% { opacity: 0.25; } 40% { opacity: 1; } }
+
+/* ── Markdown answers ─────────────────────────────────────────────────────── */
+.markdown > *:first-child { margin-top: 0; }
+.markdown > *:last-child { margin-bottom: 0; }
+.markdown h1, .markdown h2, .markdown h3 { font-size: 15px; margin: 16px 0 8px; }
+/* Keep the answer's own line breaks. Markdown treats a single newline as a soft break, so a
+   multi-line reply (an ASCII bar "graph", a list of "name | value" rows) collapsed into one
+   run-on paragraph that was unreadable. Scoped to paragraphs, so tables, lists and code blocks
+   keep their own layout. overflow-wrap stops an unbroken run (e.g. "########...") from pushing
+   the bubble sideways. */
+.markdown p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.markdown ul, .markdown ol { padding-left: 20px; margin: 8px 0; }
+.markdown li { margin: 3px 0; }
+.markdown code {
+  background: var(--panel-2);
+  padding: 1.5px 5px;
+  border-radius: 5px;
+  font-size: 13px;
+}
+.markdown table {
+  border-collapse: collapse;
+  margin: 10px 0;
+  display: block;
+  overflow-x: auto;
+  font-size: 13.5px;
+}
+.markdown th, .markdown td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+.markdown th { background: var(--panel-2); font-weight: 600; }
+
+/* ── Charts ───────────────────────────────────────────────────────────────── */
+.chart {
+  margin: 16px 0 0;
+  padding: 14px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.chart-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.chart-canvas { width: 100%; height: 320px; }
+.chart-note { margin: 10px 0 0; font-size: 11.5px; color: var(--muted); font-style: italic; }
+
+.kpi { display: flex; flex-direction: column; align-items: center; padding: 22px 0 14px; }
+.kpi-value { font-size: 46px; font-weight: 650; line-height: 1; color: var(--accent); }
+.kpi-label { margin-top: 8px; font-size: 13px; color: var(--muted); text-transform: capitalize; }
+
+/* ── SQL drawer ───────────────────────────────────────────────────────────── */
+.sql-drawer { margin-top: 14px; }
+.sql-toggle {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 12.5px;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+.sql-toggle:hover { color: var(--text); }
+.sql-block {
+  margin: 8px 0 0;
+  padding: 12px;
+  background: #0b0e14;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #b8c6dc;
+}
+
+/* ── Export menu ──────────────────────────────────────────────────────────── */
+/* Sits on the same row as the SQL toggle so the answer footer stays one line. */
+.answer-tools {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.answer-tools .sql-drawer { flex: 1 1 auto; min-width: 0; }
+
+.export-menu {
+  position: relative;
+  margin-top: 14px;
+  /* Pins Export to the right edge of the row whether or not the SQL drawer is showing.
+     Without this, .sql-drawer's flex:1 pushes Export right ONLY when SQL is rendered
+     (Show SQL on) - with it off (the default), Export was the sole flex child and sat
+     at the row's start instead, landing on the left. */
+  margin-left: auto;
+}
+.export-toggle {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 12.5px;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.export-toggle:hover { color: var(--text); }
+
+.export-options {
+  position: absolute;
+  /* right, NOT left: .export-menu is pinned to the row's right edge (via margin-left:auto
+     above), which is also the bubble's right edge. right:0 aligns the menu's right edge with
+     the button's, so it opens LEFTWARD and stays inside the bubble. left:0 was tried first but
+     opened RIGHTWARD from that same edge, extending ~180px past the bubble - fine only while
+     the button happened to sit at the row's start, which is no longer the only case now that
+     Export is always right-aligned. */
+  right: 0;
+  z-index: 20;
+  margin-top: 8px;
+  min-width: 232px;
+  padding: 6px;
+  background: #0b0e14;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
+.export-option {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  border-radius: 7px;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+.export-option:hover:not(:disabled) { background: rgba(255, 255, 255, 0.06); }
+.export-option:disabled { opacity: 0.5; cursor: default; }
+.export-option-label { color: var(--text); font-size: 13px; }
+.export-option-hint { color: var(--muted); font-size: 11.5px; }
+.export-error {
+  margin: 4px 6px 2px;
+  color: #ff9b9b;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+/* ── Empty state ──────────────────────────────────────────────────────────── */
+.empty { margin: auto 0; text-align: center; color: var(--muted); }
+.empty h2 { font-size: 18px; color: var(--text); margin: 0 0 6px; font-weight: 600; }
+.empty p { margin: 0 0 20px; font-size: 14px; }
+.empty .empty-desc { margin-bottom: 6px; color: var(--text); }
+.suggestions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.chip {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Composer ─────────────────────────────────────────────────────────────── */
+/* Small print above the input: answers are model-generated and can be wrong. Deliberately quiet —
+   it must be readable without competing with the conversation. */
+.disclaimer {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+/* One rounded card holding the input and its controls, so the mode sits where you type. */
+.composer {
+  margin: 12px 0 20px;
+  padding: 10px 10px 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  transition: border-color 0.15s;
+}
+.composer:focus-within { border-color: var(--accent); }
+
+.composer textarea {
+  display: block;
+  width: 100%;
+  resize: none;
+  min-height: 26px;
+  max-height: 180px;
+  padding: 6px 6px 2px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  field-sizing: content;
+}
+.composer textarea:focus { outline: none; }
+.composer textarea::placeholder { color: var(--muted); }
+
+.composer-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.composer-pills { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 13px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.pill:hover { color: var(--text); border-color: #3a4356; }
+.pill-icon { font-size: 13px; line-height: 1; }
+/* Active state mirrors the badge colour used on answers from that mode. */
+.pill-on {
+  background: rgba(79, 156, 249, 0.15);
+  border-color: var(--accent);
+  color: #8fc0fc;
+}
+
+.send {
+  margin-left: auto;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.send:disabled { opacity: 0.35; cursor: default; }
+.send-stop { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); }
+
+@media (max-width: 640px) {
+  .app { padding: 0 12px; }
+  .bubble { max-width: 100%; }
+  .chart-canvas { height: 260px; }
+}

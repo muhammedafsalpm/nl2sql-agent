@@ -1,0 +1,61 @@
+# Pinned to the exact versions this app is tested and running against. Bump deliberately,
+# one package at a time, then re-run `python -m eval.run_eval` before committing an upgrade —
+# an unbounded `>=` lets a routine `pip install` silently jump a major version.
+
+# Core orchestration
+langgraph==1.2.9
+langchain-core==1.4.9
+langchain-ollama==1.1.0
+langchain-openai==1.3.5   # used when LLM_PROVIDER=open
+
+# Database
+pyodbc==5.3.0
+
+# Config & terminal UI
+python-dotenv==1.2.2
+rich==15.0.0
+
+# HTTP API
+fastapi==0.141.1
+uvicorn[standard]==0.52.1
+pydantic==2.13.4   # imported directly in app/api/schemas.py and app/api/main.py — was
+                    # previously undeclared, relying on fastapi pulling it in transitively
+
+# Export formats (POST /api/export). Imported lazily inside app/api/export_formats.py, so a
+# missing one degrades to a 501 for THAT format instead of breaking the API at import time.
+openpyxl==3.1.5      # .xlsx
+python-docx==1.2.0   # .docx
+
+# Optional Langfuse tracing (POST-hoc observability; see app/tracing.py). Both are inert unless
+# LANGFUSE_PUBLIC_KEY is set in .env, so installing them changes no behaviour on its own.
+#
+# `langchain` is required ONLY because langfuse.langchain.CallbackHandler does `import langchain`
+# to read __version__ and pick its v0/v1 import paths — every symbol it actually uses comes from
+# langchain-core, which was already here. 1.3.14 is pinned deliberately: it is the newest release
+# that does NOT drag langchain-core off 1.4.9 (installing plain `langchain` bumps core to 1.6.1
+# and langgraph to 1.2.11, verified with `pip install --dry-run`).
+langfuse==4.15.0
+langchain==1.3.14
+
+# Voice — speak a question, hear the answer (app/voice/). ~183 MB installed.
+#
+# These live here rather than in a separate optional file because voice is a shipped feature, and
+# a second install step is one people forget — "the mic never appears" then becomes a support
+# question. Merging them costs 183 MB and removes that failure mode.
+#
+# Installing them does NOT enable voice by itself. Two things still cannot come from pip:
+#     ffmpeg                          system tool - winget install Gyan.FFmpeg / apt-get install ffmpeg
+#     python scripts/setup_voice.py   downloads the ~60 MB Piper voice file
+# Until both are done, /api/voice/status reports unavailable, the mic stays hidden, and every
+# other part of the app behaves exactly as before. VOICE_ENABLED=0 does the same deliberately.
+#
+# GPU users additionally want the CUDA runtime CTranslate2 links against - deliberately NOT here,
+# because it is ~2 GB and useless on a CPU-only or laptop deployment (the code falls back to CPU
+# by itself when it is absent):
+#     pip install nvidia-cublas-cu12 nvidia-cudnn-cu12
+#
+# faster-whisper runs on CTranslate2, NOT PyTorch: one code path serves GPU and CPU, the smaller
+# model sizes fit a 4 GB laptop card, and it pulls ~13 packages instead of the ~70 (incl. torch)
+# a PyTorch ASR needs. Verified with `pip install --dry-run`: no pinned version above moves.
+faster-whisper>=1.2.0   # Speech-to-Text
+piper-tts>=1.2.0        # Text-to-Speech

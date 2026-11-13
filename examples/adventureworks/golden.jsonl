@@ -1,0 +1,16 @@
+{"question": "How many orders are there?", "expect_tables": ["sales.salesorderheader"], "notes": "Count the header table, not order lines."}
+{"question": "How many products do we sell?", "expect_tables": ["production.product"], "notes": "FinishedGoodsFlag = 1 marks sellable products."}
+{"question": "What was the total revenue per year?", "expect_tables": ["sales.salesorderheader"], "notes": "SUM(SubTotal) grouped by YEAR(OrderDate)."}
+{"question": "Show revenue by product category as a donut chart.", "expect_tables": ["sales.salesorderdetail", "production.productcategory"], "notes": "Sum LineTotal; product -> subcategory -> category."}
+{"question": "Top 5 products by units sold.", "expect_tables": ["sales.salesorderdetail", "production.product"], "notes": "TOP 5 ordered by SUM(OrderQty) DESC."}
+{"question": "Which territory has the highest sales?", "expect_tables": ["sales.salesorderheader", "sales.salesterritory"], "notes": "Sum SubTotal by territory."}
+{"question": "Compare online and reseller revenue.", "expect_tables": ["sales.salesorderheader"], "notes": "Split on OnlineOrderFlag."}
+{"question": "Who are our top 10 customers by revenue?", "expect_tables": ["sales.salesorderheader", "sales.customer"], "notes": "Customer name from Person.Person or Sales.Store."}
+{"question": "How many orders shipped after their due date?", "expect_tables": ["sales.salesorderheader"], "notes": "ShipDate > DueDate."}
+{"question": "What was the revenue in the last 3 months?", "expect_tables": ["sales.salesorderheader"], "notes": "Anchor on MAX(OrderDate), not GETDATE()."}
+{"question": "List the sales people with their quota and sales this year.", "expect_tables": ["sales.salesperson", "person.person"], "notes": "Name from Person.Person."}
+{"question": "Which products have fewer than 100 units in stock?", "expect_tables": ["production.productinventory"], "notes": "Sum Quantity across locations first."}
+{"question": "How many employees work in each department?", "expect_tables": ["humanresources.employeedepartmenthistory", "humanresources.department"], "notes": "Current department only: EndDate IS NULL."}
+{"question": "What is the average current pay rate by job title?", "expect_tables": ["humanresources.employeepayhistory", "humanresources.employee"], "notes": "Latest RateChangeDate per employee, then average."}
+{"question": "Which work orders were completed late, and by how many days?", "expect_tables": ["production.workorder"], "notes": "EndDate > DueDate."}
+{"question": "Which vendors do we spend the most with?", "expect_tables": ["purchasing.purchaseorderheader", "purchasing.vendor"], "notes": "Sum SubTotal by vendor."}
