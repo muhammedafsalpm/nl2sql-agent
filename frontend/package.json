@@ -1,5 +1,5 @@
 {
-  "name": "sql-assistant-ui",
+  "name": "nl2sql-agent-ui",
   "private": true,
   "version": "1.0.0",
   "type": "module",

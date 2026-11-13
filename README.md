@@ -1,10 +1,80 @@
-# SQL Assistant — natural language to SQL for Microsoft SQL Server
+<div align="center">
 
-An open-source **multi-agent NL-to-SQL assistant** built on LangGraph. Point it at any Microsoft
-SQL Server database, describe your business in two plain text files, and your users can ask
-questions in everyday language. It plans, writes T-SQL, runs it **read-only (SELECT only)**,
-analyses and predicts, independently verifies its own answer, and draws a chart when asked —
-from a terminal, an HTTP API, or a web chat UI ([frontend/](frontend/)) with optional voice.
+# NL2SQL Agent
+
+**Ask your SQL Server database questions in plain English — get verified answers, charts and exports.**
+
+A multi-agent **Text-to-SQL** assistant built on **LangGraph**: it plans, writes T-SQL, runs it
+read-only, double-checks the result with an independent verifier, and explains it in plain words.
+Works with **OpenAI**, any **OpenAI-compatible** server, or **local models via Ollama**.
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+![LangGraph](https://img.shields.io/badge/LangGraph-multi--agent-7c3aed.svg)
+![SQL Server](https://img.shields.io/badge/SQL%20Server-T--SQL-cc2927.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688.svg)
+![React](https://img.shields.io/badge/React-web%20UI-61dafb.svg)
+![Ollama](https://img.shields.io/badge/Ollama-local%20LLMs-black.svg)
+[![GitHub stars](https://img.shields.io/github/stars/muhammedafsalpm/nl2sql-agent?style=social)](https://github.com/muhammedafsalpm/nl2sql-agent/stargazers)
+
+[Quickstart](#quickstart-about-10-minutes) ·
+[How it works](#how-it-works--agents-vs-nodes) ·
+[Use your own database](#use-your-own-database) ·
+[Roadmap](#roadmap) ·
+[Contributing](CONTRIBUTING.md)
+
+</div>
+
+---
+
+> ⭐ **If this project is useful to you, please star the repo** — it helps others find it.
+
+## Why NL2SQL Agent?
+
+Most text-to-SQL demos stop at "the query ran". Real business questions need more: the right
+table grain, the right join, the right definition of "active" or "late" — and an answer you can
+trust. NL2SQL Agent is built around that:
+
+- 🧠 **Multi-agent pipeline (LangGraph)** — Orchestrator, Planner, SQL Author, Analyst, Verifier
+  and Synthesizer, each with one job, coordinated by a state machine with bounded retry loops.
+- ✅ **Verified answers** — an independent Verifier re-checks the SQL and the data *before* the
+  answer is written, and sends real feedback back to the SQL Author when something is wrong.
+- 🔒 **Read-only by design** — a deterministic validator blocks anything that is not a single
+  `SELECT` (writes, `EXEC`, `xp_cmdshell`, `OPENROWSET`, multi-statements) before it reaches the
+  database.
+- 📚 **Your business knowledge, no code** — describe terms, table grain and tricky joins in plain
+  Markdown files; the schema, keys and lookup values are read from the live database.
+- 📊 **Charts, Excel & Word export** — charts are built from the real rows (never re-typed by the
+  LLM); downloads contain the complete result.
+- 🔁 **Follow-up questions** — "now as a chart", "only the top 5", "explain that" keep context.
+- ⚡ **Two modes** — *Normal* (fast, ~seconds) for simple questions, *Deep Search* for thorough,
+  verified analysis and predictions.
+- 🏠 **Any LLM** — OpenAI, OpenAI-compatible servers (LM Studio, vLLM, OpenRouter, Groq) or fully
+  local models through Ollama, so your data can stay on your network.
+- 🎙️ **Optional voice** — ask out loud, hear the answer (faster-whisper + Piper, runs locally).
+- 🔍 **Observability** — colour agent trace in the console and optional Langfuse tracing.
+
+```mermaid
+flowchart LR
+    Q([Question]) --> O[Orchestrator]
+    O -->|small talk| C[Chitchat] --> A([Answer])
+    O -->|unclear| CL[Clarify] --> A
+    O -->|data| S[SQL Author]
+    O -->|multi-part| P[Planner] --> S
+    S --> V{{Validator<br/>SELECT-only}}
+    V -->|unsafe| S
+    V --> E[(Executor<br/>read-only)]
+    E -->|DB error| S
+    E -->|more data needed| P
+    E -->|needs analysis| AN[Analyst] --> VE
+    E --> VE[Verifier]
+    VE -->|data does not fit| S
+    VE -->|approved| SY[Synthesizer]
+    SY --> CH[Chart] --> A
+    SY --> A
+```
+
+## What you configure
 
 **Nothing in the code is tied to one company or industry.** Everything specific to your data
 lives in three places you control:
@@ -646,7 +716,7 @@ Wait for it to log `Ready`.
 **6. Open the UI in your browser** at whatever port you're using — e.g. `http://localhost:3000`
 (or `:3100` if you remapped it). Sign up with your own email/password — this creates an account
 **on your own instance only**, nothing external or shared. Then create an **Organization**, then
-a **Project** inside it (name it anything, e.g. "SQL Assistant").
+a **Project** inside it (name it anything, e.g. "NL2SQL Agent").
 
 **7. Get your API keys.** Inside the project: **Settings → API Keys → Create new API key.** This
 generates two values — copy both immediately, the secret key is shown only once:
@@ -703,7 +773,7 @@ Skipping Langfuse entirely (leaving the 3 keys blank) is a fully supported, zero
 
 | Key | Meaning |
 |-----|---------|
-| `APP_NAME` | Display name in the UI, API docs, CLI and export file names (default `SQL Assistant`) |
+| `APP_NAME` | Display name in the UI, API docs, CLI and export file names (default `NL2SQL Agent`) |
 | `APP_DESCRIPTION` | One sentence about what your database holds; given to the agents. Optional |
 | `DOMAIN_DIR` | Folder with your `business_rules.md`, `few_shots.md`, `golden.jsonl` (default `domain`, relative to `backend/`) |
 | `LLM_PROVIDER` | `local` (Ollama) or `openai` (OpenAI or an OpenAI-compatible server) |
@@ -813,7 +883,7 @@ nothing).
 ## Project structure
 
 ```
-sql-assistant/
+nl2sql-agent/
 ├── examples/adventureworks/          # complete sample domain pack (rules, few-shots, tests)
 ├── docs/writing-domain-files.md      # how to write good business rules and examples
 ├── backend/                          # Python — agents, API, database
@@ -870,6 +940,25 @@ sql-assistant/
   reader are written for its dialect and catalogue views.
 - More agents per question means more LLM calls = slower on a local model; tune with
   `MAX_QUERIES` / `MAX_SQL_RETRIES`, or use **Normal** mode for simple questions.
+
+## Roadmap
+
+Ideas and contributions are welcome — open an issue to discuss any of these:
+
+- [ ] PostgreSQL and MySQL support (dialect profiles for prompts, validator and schema reader)
+- [ ] Docker Compose for one-command start (backend + UI + sample database)
+- [ ] Automated tests and GitHub Actions CI
+- [ ] More example domain packs (retail, HR, finance, logistics)
+- [ ] Native Anthropic Claude and Google Gemini clients
+- [ ] Saved questions and shareable answer links
+
+## Contributing
+
+Contributions of any size are welcome — bug reports, domain packs, docs, or code. See
+[CONTRIBUTING.md](CONTRIBUTING.md). Found a security issue? Please follow [SECURITY.md](SECURITY.md)
+instead of opening a public issue.
+
+If NL2SQL Agent helps you, a ⭐ on GitHub is the easiest way to support the project.
 
 ## License
 

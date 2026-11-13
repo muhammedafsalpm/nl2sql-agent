@@ -33,7 +33,7 @@ def _resolve_dir(value: str, default: str) -> str:
 class Settings:
     # ── Identity (shown in the UI, API docs, CLI and export file names) ─────────
     # Nothing in the code names a product or a company. Set these two to describe YOUR data.
-    app_name: str = field(default_factory=lambda: _get("APP_NAME", "SQL Assistant") or "SQL Assistant")
+    app_name: str = field(default_factory=lambda: _get("APP_NAME", "NL2SQL Agent") or "NL2SQL Agent")
     # One plain sentence about what the connected database holds. It is given to the agents so
     # they understand the subject ("sales, products, customers and inventory of a bicycle
     # company"). Blank is allowed: the agents then work from the schema alone.

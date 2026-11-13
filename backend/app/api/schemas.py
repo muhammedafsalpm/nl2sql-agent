@@ -175,7 +175,7 @@ class ReadyResponse(BaseModel):
 
 class InfoResponse(BaseModel):
     # Display name and one-line subject of the assistant (APP_NAME / APP_DESCRIPTION in .env).
-    app_name: str = "SQL Assistant"
+    app_name: str = "NL2SQL Agent"
     app_description: str = ""
     provider: str
     model: str

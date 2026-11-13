@@ -25,12 +25,12 @@ Use it to try the assistant in a few minutes, and as a model for writing your ow
 Run this in the restored database, with your own password:
 
 ```sql
-CREATE LOGIN sql_assistant_ro WITH PASSWORD = '<choose-a-strong-password>';
+CREATE LOGIN nl2sql_ro WITH PASSWORD = '<choose-a-strong-password>';
 USE AdventureWorks2022;
-CREATE USER sql_assistant_ro FOR LOGIN sql_assistant_ro;
-ALTER ROLE db_datareader ADD MEMBER sql_assistant_ro;
+CREATE USER nl2sql_ro FOR LOGIN nl2sql_ro;
+ALTER ROLE db_datareader ADD MEMBER nl2sql_ro;
 -- Optional: lets the assistant notice new data quickly (row-count statistics).
-GRANT VIEW DATABASE STATE TO sql_assistant_ro;
+GRANT VIEW DATABASE STATE TO nl2sql_ro;
 ```
 
 ## 3. Point the assistant at it
@@ -45,7 +45,7 @@ DOMAIN_DIR=../examples/adventureworks
 DB_SERVER=localhost
 DB_PORT=1433
 DB_NAME=AdventureWorks2022
-DB_USER=sql_assistant_ro
+DB_USER=nl2sql_ro
 DB_PASSWORD=<the password you chose>
 
 # The business schemas. dbo only holds build/log tables in this sample.

@@ -36,7 +36,7 @@ function suggestionsFor(info: InfoResponse | null): string[] {
 const HISTORY_TURNS_SENT = 10;
 
 /** Shown until /api/info answers, and if the backend predates the app_name field. */
-const DEFAULT_APP_NAME = "SQL Assistant";
+const DEFAULT_APP_NAME = "NL2SQL Agent";
 
 export default function App() {
   const [messages, setMessages] = useState<Message[]>([]);
